@@ -1,0 +1,63 @@
+1.查看/杀死应用进程
+pgrep mongod/crond/ruby/nodejs
+killall mongod/crond/ruby/nodejs
+
+2.crontab
+ntsysv：查看是否开机启动
+chkconfig --list|grep cron：查看状态
+service crond status：查看是否运行
+pgrep crond：查看其进程
+cat /var/log/cron：查看日志（任务是否运行）
+cat /var/spool/mail/root：查看邮件(任务运行过程中错误)
+service crond stop
+service crond start
+service crond restart
+chkconfig crontab on：设置开机启动
+crond：出现以下错误
+can't lock /var/run/crond.pid
+以root身份删除/var/run/crond.pid
+crontab -u root /var/spool/cron/root 执行身份对应的任务文件
+tcpdump -c 1
+
+3. /etc/profile、~/.bash_profile
+见：http://blog.chinaunix.net/uid-14735472-id-3190130.html
+
+
+4./dev/null 2>&1表示将所有stdout和stderr丢弃
+见：http://dongwei.iteye.com/blog/322702
+
+5.echo $PATH：查看系统路径
+
+6. nohup
+nohup bundle exec ruby scheduler.rb >grablog 2>&1 &：指定后台线程的输出文件。
+回车，然后输入exit.
+
+7.cd/ls/open 输入两个字母后按tab可补全文件/文件夹名
+
+8.open ~/taodou 可快速打开finder
+open ~/taodou/app.js -a sublime\ text\ 2
+open ~/app.js -a macvim == mvim app.js
+让sublime text 2也支持命令行：
+sudo ln -s "/Applications/'Sublime Text 2.app'/Contents/SharedSupport/bin/subl" /usr/local/bin/subl
+
+
+
+9.mv是移动命令，cp是复制文件。
+
+10.ls -l详细，-a包括隐藏文件，
+
+11.mv参数－rf 表示递归和强制，千万要小心使用，如果执行了 rm -rf / 你的系统就全没了
+
+12.空格在命令中写成 \空格， 比如要进入 My Documents，命令为 cd My\ Documents
+
+13. 关机命令 ---- sudo shutdown -h now
+有些时候系统出问题关机不成功可以试试用命令行进行关机，毕竟裸关电源不好。最初我的机器有时死机我就是用命令行关机的。诡异的很自从刚买机器的时候死过2次机就再也没有斯过了。终端中还可以使用halt命令配合其他参数实现关机，但推荐shutdown~
+
+14.purge释放内存
+
+15.find
+find /usr/bin -name mvim
+-name不能省，否则找不到
+
+16.curl
+curl -I 查询头

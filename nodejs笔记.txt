@@ -1,0 +1,74 @@
+版本管理工具nvm:
+curl https://raw.github.com/creationix/nvm/master/install.sh | sh
+ . ~/.nvm/nvm.sh
+nvm install 0.8.25
+nvm use 0.8.25
+nvm alias default 0.8.25
+node -v
+======初始化一个项目======
+-- 手动 ---  
+git 创建项目
+本地根目录下 git clone git@github.com:freemember007/xmapp.git
+vi .gitignore
+npm init
+vi package.json，加需要的包
+npm install
+--- 自动 ---
+git 创建项目
+本地根目录下 git clone git@github.com:freemember007/xmapp.git
+vi .gitignore
+本地根目录下 express --sessions --css stylus --jade xmnew
+npm install
+npm install mongodb mongoose cron --save (也可以先init)
+bower install bootstrap jquery --save
+vi .gitignore 
+（加.DS_Store
+node_modules/
+components/）
+
+1.mongodb开机自动启动
+brew install mongodb
+按提示操作：http://ruby-china.org/topics/160
+或在/etc/rc.local文件末尾添加下面的代码
+#add mongodb service
+/usr/local/bin/mongod --dbpath=/data/db/ --fork --port 27017 --logpath=/data/db/log --logappend（--fork --port 27017貌似可有可无？）
+
+2.mongodb后台daemon启动（遗留问题：如何开机启动？）
+cd /usr/local/Cellar/mongodb/
+mongod --dbpath=/data/db --fork --logpath=log
+或（关键是--fork）
+mongod --dbpath=/data/db --logpath=/tmp/mongod.log --fork
+开机启动：http://ruby-china.org/topics/160
+
+3.安装并使用服务器管理工具forever(后台daemon启动)（（遗留问题：如何开机启动？））
+npm install forever -g -d
+NODE_ENV=production forever start app.js
+开发环境：forever start app.js
+停止服务：forever stopall
+
+4.addListener与on是一样的。见：http://nodejs.org/api/events.html#events_emitter_addlistener_event_listener
+
+5.npm安装技巧：
+npm install <name> --save 本地安装，并且自动将安装信息写进package.json
+npm init 初始化一个package.json
+npm root -g 查看全局包的路径
+npm ls 列出当前目录下的所有包
+
+6.使用node-dev热布署开发版本，需配合安装一个gem:
+sudo gem install terminal-notifier
+.node-dev.json的配置文件貌似可有可无
+此外还有supervisor也可以热布署，
+
+7.Node.js With Express, Jade, Stylus and Coffeescript（非常好！！！）:
+http://parseflo.at/post/node-js-with-express-jade-stylus-and-coffeescript/
+express -t jade -c stylus
+stylus 我們只需要在開發環境裡面使用即可，因此設定如下:
+http://blog.caesarchi.com/2012/10/stylus-nib-express-on-nodejs.html
+
+8.nodejs也能做桌面应用，见：
+http://appjs.org/ (此项目已经废了)
+类似：http://www.tidesdk.org/（前身为titanium desktop！开源后个人提炼的版本，不被看好）
+
+9.使用cron做定时任务
+
+10.

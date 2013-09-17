@@ -1,0 +1,19 @@
+1.索引及唯一性
+命令行：db.items.ensureIndex({text:1},{unique:true,dropDups:true})
+mongoose:
+text：{type:String,index:true,unique:true},
+注意：dropDups是删除重复条目，这个在schema里是没法做的。另，唯一性并不一定要在索引的前提下！
+参见：http://stackoverflow.com/questions/9024176/mongoose-duplicates-with-the-schema-key-unique
+另可参见关于upsert的命令：
+http://www.iteye.com/topic/1127419
+另可参见关于索引的内容：
+http://www.uml.org.cn/sjjm/201202162.asp
+
+2.按id查询之前和之后的数据：
+db.deals.find({ '_id': { $gt:ObjectId("5208e40626684a1b0d00003b")}})
+上一条下一条：
+db.deals.find({ '_id': { $gt:ObjectId("5208e40626684a1b0d00003b")}}).limit(1)
+
+3.查询符合条件的记录总数
+db.deals.find().count()
+

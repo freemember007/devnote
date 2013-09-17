@@ -1,0 +1,43 @@
+服务器问题处理办法
+
+==========xmzdm============
+===【updated】Cannot allocate memory处理方法===
+http://www.syshacker.com/archives/1287
+注意，free -m 检查内存占用！！！
+另一种解决办法，待试：
+http://blog.sina.com.cn/s/blog_4e46604d01015ciw.html
+vi /etc/security/limits.conf
+#@faculty        hard    nproc           50
+*          soft    nproc     10240
+
+==========gddln============
+
+4.mongodb出错：
+ps aux | grep mongo
+kill 1227
+rm -f /data/db/mongod.lock
+mongod --repair
+reboot
+(无更好的办法,把以上多重复几次,尤其是多重启几次)
+注意，free -m 检查内存占用！！！
+问题：couldn’t connect to server 127.0.0.1 shell/mongo.js:84===
+解决：http://www.cnblogs.com/MrBackKom/archive/2012/06/10/2544381.html
+
+===========Tmweb=============
+查看log:tail -100f log/production.log
+
+问题：Can't connect to local MySQL server through socket '/tmp/mysql.sock' (111) (Mysql2::Error)
+解决：sudo service mysqld start或sudo service mysqld restart
+
+使用mysql命令行
+mysql -uroot -S /tmp/mysql.sock
+密码为空！！！故以上命令行中-P可不要
+show databases;
+use tmweb_production
+describe users
+select * from users limit 2
+update users set device_token="" where id=2;
+
+
+Library not loaded: libmysqlclient.18.dylib in OS X
+解决：sudo ln -s /usr/local/mysql/lib/libmysqlclient.18.dylib /usr/lib/libmysqlclient.18.dylib或export DYLD_LIBRARY_PATH="$DYLD_LIBRARY_PATH:/usr/local/mysql/lib/"

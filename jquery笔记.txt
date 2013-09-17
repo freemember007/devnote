@@ -1,0 +1,26 @@
+1.image的load对于缓存的图片无效，故借用此插件即可：
+https://github.com/desandro/imagesloaded
+browserify环境修改版：https://npmjs.org/package/image-loaded
+
+2.图片缩放和裁切不需要用flash，用blueimp-load-image即可，不过貌似需浏览器支持html5，即IE10+:
+DEMO地址:http://blueimp.github.io/JavaScript-Load-Image/
+
+
+3.text精确匹配：
+$('a:contains('+index.toString()+'):last').map(function(){if ($(this).text() == index.toString()) {return this;}}).attr('href')
+
+4.p > a
+匹配作为<p>元素的直接子节点的链接，如链接被嵌套在更深一层，比如在<p>之内的<span>之内，则链接不会被选中。
+
+5.tbody[id^=normalthread] a.xst
+
+====== 跨域 ======
+1.不同子域，服务器可控的情况
+(1) iframe
+(2) flash
+2.不同域名，服务器不可控的情况
+(1) jquery的$.getJSON，仅可get JSON
+(2) FlyJSONP插件，可get或post JSON
+(3) cross-domain-ajax，可get html，实现上借助了YQL(实际上是由YQL服务器中转)
+参考：http://james.padolsey.com/javascript/cross-domain-requests-with-jquery/
+要求POST的：http://christianheilmann.com/2009/11/16/using-yql-to-read-html-from-a-document-that-requires-post-data/

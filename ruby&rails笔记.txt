@@ -1,0 +1,17 @@
+1.按ID一次取多条数据
+@items = u.items.find([43,44])
+
+2.其实当你确定有这个id的时候就应该用Model.find(id), 没有就应该抛出异常,不确定有没有id的时候用 Model.find_by_id(id)，见：
+http://ruby-china.org/topics/3752
+要在一批不知是否存在的ID中批量查询，直接写sql语句：
+@items = u.items.find_by_sql("select * from items where id in (0,68,75)")
+如果0不存在，则会忽略，输出68与75.
+
+3.从数组中随机取N个值组合新的数组用sample函数：
+http://blog.sina.com.cn/s/blog_628e2ab30101aruf.html
+
+4.问题：rand函数如何一次生成一个随机数组？
+
+5.似乎无法忽略一个默认default_scope：https://github.com/sferik/rails_admin/issues/353
+
+6.ruby1.9.3下使用中文字符报变量错误，起初以为是因为安装ruby时未编译正确版本的readline，参考：http://ruby-china.org/topics/2415，按提示重装了readline 和ruby未解决，继续搜索，发现：http://ruby-china.org/topics/3073。在文件首加上 # encoding: utf-8，问题解决 ！！！

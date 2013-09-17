@@ -1,0 +1,52 @@
+========== 必杀技 ========
+1.关于collection，一般来说，全局使用一个单例singleton即可，这样便于维护，也便于各view之间沟通，而不必所有跨view交互都通过router，从而使router越来越臃肿且包括不合逻辑的路由。
+
+========== Event ========
+
+1.用以下写法替代this.model.on('add', this.render, this)：
+this.listenTo(this.collection, 'change', this.render);
+
+
+========= Model =========
+1.若给model 传递{collection: …}属性，可方便计算model url，如无指定，将自动赋值为它第一次被加的collection.
+
+2.如给model定义了{parse: …}属性，则attributes在被set至model前被转换
+
+3.has
+if the attribute is set to a non-null or non-undefined value.
+
+4.model.attributes.title == model.get('title')
+但一般不要直接操作attributes，如获得attributes的副本，用toJSON。
+
+5.id与idAttribute
+id-可以为任意字符，可以手工设定（如果在 attributes hash设定了ID属性，它将被拷贝至model's direct property）,model可以通过id从集合retrieve, 也默认被作为生成model的url。用法：model.id
+idAttribute - this decides which property will act as（扮演） the unique id (default is "id")，即，model默认的独立标识符的字面量是'id'，存储在attributes的'id'属性中，但如果与服务端同步，如mongoDB可能用的不同的unique key/identifier，如'_id'，这时需要用idAttribute: "_id"，来映射id.
+可见，model.id != model.idAttribute, 是两个不同层面的属性。后者有点类似对主键(primary key)的定义。
+
+6.model.attributes 与 _.clone(model.attributes)
+与 model.toJSON()与JSON.stringify
+
+7.CRUD对应表
+save    create  POST   /collection
+fetch   read    GET    /collection[/id]
+save    update  PUT    /collection/id
+destory delete  DELETE /collection/id
+
+8.save
+-{patch: true}：If instead, you'd only like the changed attributes to be sent to the server, call model.save(attrs, {patch: true}). You'll get an HTTP PATCH request to the server with just the passed-in attributes.
+-{wait: true}：服务器搞定了本地才同步
+
+9.validate
+默认在save时运行，若想set时也验证，需手动传入{validate:true}
+
+10.invalid与isValid
+-invalid：validate失败后触发invalid事件，同时用方法返回值设置model的validationError值。
+-isValid: 执行validate方法
+
+======== Collection =======
+1.
+
+
+======== sync ============
+1.model save后会被直接按服务端res的hash来设置model的attr(含id)
+

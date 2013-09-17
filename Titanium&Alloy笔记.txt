@@ -1,0 +1,294 @@
+Titanium&Alloy笔记
+
+===创建项目===
+github.com创建项目xmapp
+本地根目录下:git clone git@github.com:freemember007/xmapp.git
+本地根目录下:ti create -f xmapp（根据提示走, -f的意思是对现有的目录重写）
+cd xmapp
+alloy new
+git status, git add ., git commit -m 'create', git push orgin master(master可省略)
+
+===sublime2插件Tita===
+tita, titanium build（在tools里,貌似不能用）, titanium api, titanium search(不可用)。
+如果搜索安装不到，可以：
+cd ~/Library/Application\ Support/Sublime\ Text\ 2/Packages/
+git clone git@github.com:tsteur/sublimetext-tita
+
+===使用terminal快速安装应用===
+1.快速打开terminal: 先在sublime2中安装terminal插件，编辑快捷键设置为super+alt+shift+i, 即可在项目根目录打开terminal。
+2.保存长命令：在项目根目录vi i.sh，输入以下内容：
+ti build -p ios -T device -V "xiao jiang ping (N6HWBG675D)" -P EE20F27B-E6B9-4670-A756-7F38C4EB0026
+3.以后直接运行命令sh i.sh即可执行。
+更妙的办法：super+shift+p,搜索terminal setting-default, 设置 "terminal": "Terminal.sh", 修改Terminal.sh文件为：CD_CMD="cd "\\\"$(pwd)\\\"" && clear && ti build -p ios -T device -V 'xiao jiang ping (N6HWBG675D)' -P EE20F27B-E6B9-4670-A756-7F38C4EB0026 "
+4.更妙的办法：直接改tita插件的核心文件：Tita.py
+
+===Titanium及alloy命令行===
+1.ti setup定位基本设置，其中最重要的是定义android sdk path: ~/AndroidSDK
+2.ti build -p android -S WVGA800 -A ~/AndroidSDK -T device(-p等于--platform,-T等于--target(仅android有此选项),注意大小写)
+参考：http://docs.appcelerator.com/titanium/latest/#!/guide/Titanium_Command-Line_Interface_Reference-section-35619828_TitaniumCommand-LineInterfaceReference-Build
+3.注意：alloy run已被ti build替换，alloy命令行主要提供程序脚手架（new, generate）,而ti最主要的则是用做build
+
+===开发经验总结===
+1.iphone模拟器下sqlite文件地址：
+/Users/xjp/Library/Application Support/iPhone Simulator/6.1/Applications
+
+2.图片压缩模块：
+android:https://github.com/novelys/titanium-jpegencoder
+iphone1:https://github.com/sideshowcoder/jpgcompressor
+iphone2:https://github.com/gudmundurh/titanium-imaging
+官方：https://github.com/appcelerator/titanium_modules/tree/master/imagefactory/mobile
+模块使用方法：http://docs.appcelerator.com/titanium/latest/#!/guide/Using_Titanium_Modules
+
+3.android下的提醒元素用于事件完成后提醒，比如发布成功，比alert好：Notification
+
+4.注册后台服务：
+var service = Ti.App.iOS.registerBackgroundService({url:'bg.js'});
+
+5.此input样式不错：
+borderStyle: Titanium.UI.INPUT_BORDERSTYLE_BEZEL,
+borderColor:"#ccc",
+
+6.为了窗口能有navbar,用modal window，但它关闭后打开另一窗口不成，改用只有一个tab的tabGroup可以，但出现另一问题，即底部显示一条tabGroup区域，解决办法：
+在window中设tabBarHidden:true 注：1.仅适用iPhone，2.不是在tabGroup里。
+参考：
+http://developer.appcelerator.com/question/106251/how-to-create-title-bar-on-window
+http://developer.appcelerator.com/question/105931/hidedisable-tabbar-in-currentwindow
+
+7.Sublime Text 2 的tita插件，支持Alloy语法高亮，支持Build，命令行！太棒了！：(注意别用ST3)
+https://github.com/tsteur/sublimetext-tita
+
+8.tableviewsection 定义headview 而非headtitle即可自定义样式
+
+9.Alloy最新版本安装：在github-alloy找到最新版本分支，下载zip文件，解压，cd, sudo npm install -g
+
+9.Alloy编译时，会寻找index.js(.xml.tss)将其作为应用主入口写进app.js，同时，alloy.js内的代码也会在编译(运算)后copy至app.js，对于要判断情景给入不同主入口的情况，可以在index内使用if判断。比较好的做法是用index做loading或数据准备。
+
+10.注意，重复元素，如tablesection, tablerow，即使定义了id，也无法用$.id选择。
+
+11.Titanium本身有内置的图片处理函数（支持imageAsCropped、imageAsResized、imageAsThumbnail、imageWithAlpha、imageWithTransparentBorder等诸多常用功能！）：http://developer.appcelerator.com/question/149134/imagefactory-version
+
+12.iPhone有系统的back按钮，见window的backButtonTitle属性：http://docs.appcelerator.com/titanium/latest/#!/api/Titanium.UI.Window-property-backButtonTitle
+
+13.tabel移动至底部时刷新太复杂了：https://github.com/appcelerator/KitchenSink/blob/master/Resources/ui/handheld/ios/baseui/table_view_dynamic_scroll.js或http://developer.appcelerator.com/question/142780/tableview-scroll-down-to-add-new-data
+这个更简单：http://developer.appcelerator.com/question/128437/detect-that-we-reach-the-bottom-of-a-view-scroll
+
+14.隐藏底部Tabbar的方法：$.table.removeEventListener("scroll",hideNavBar);
+
+15.点击tab时不显示其对应的窗口：http://developer.appcelerator.com/question/144751/create-a-tabgroup-that-doesnt-show-a-tabs-window-when-the-tab-icon-is-click
+
+16.改变tab的窗口内容，最简的办法是tab.open/close(win)：http://developer.appcelerator.com/question/133182/how-do-you-dynamically-refreshreload-a-tab-window，值得注意的是:
+(1)是tab.open(win)不是tab所在的win.open(win)
+(2)常常需要使用Ti.UI.currentTab.open()，但这玩意跟currentWindow一样在commonJS环境下都不起作用，解决办法是：Alloy.Globals.tabGroup.activeTab.open(detail)
+(3)新打开的窗口貌似需要主动写$.monthDay.showNavBar()，才会显示navbar.(后来发现貌似不是这样，可能它的前一个窗口已隐藏navbar，造成它也会隐藏)
+
+17.屏蔽titanium分析：http://developer.appcelerator.com/question/40121/disable-analytics-on-titanium-developer
+
+18.多级列表（如“设置”、“多级订阅”）用NavigationGroup非常方便，见：http://docs.appcelerator.com/titanium/latest/#!/api/Titanium.UI.iPhone.NavigationGroup
+
+19.currentWindow与getCurrentWindow()在commomJS项目中无效，见：
+http://developer.appcelerator.com/question/145004/how-can-i-get-currentwindow-when-i-create-project-with-masterdetail-application-template
+
+20.在tiapp.xml文件中改变statusbar颜色要删除build文件夹重新编译后才能看到效果：
+http://developer.appcelerator.com/question/34951/statusbar-style-node
+但在alloy.js中写则可直接生效：http://developer.appcelerator.com/question/51801/status-bar-style-and-14
+要实现statusbar半透明，貌似必须用hacker方法(设置窗口或tabgroup的top:-20,bottom:-49,)：http://developer.appcelerator.com/question/138504/ios-statusbar-transparent
+
+21.iPhone有很多很好的自带的UI风格，如窗口打开风格：
+win.open({transition:Titanium.UI.iPhone.AnimationStyle.FLIP_FROM_RIGHT})
+win.open({transition: Titanium.UI.iPhone.AnimationStyle.CURL_DOWN})
+
+22.window的title可以用titleControl自定义
+
+23.headPullView里面需放一个View方可，否则什么都不会显示。
+
+24.中文字体也可以使用fontWeight:"bold"显示为加粗。
+
+25.在使用Alloy.createController传递的变量不仅可以传递普通变量，还可以传递View或函数，View用$.表示即可，函数则不带括号，运行时带括号即可。相应的，Alloy.Globals除子可以定义全球View外，也可以定义全球函数，定义和使用方法跟Alloy.createController类似。
+
+26.列表row设置className为i(某自然增长变量)，可加速列表的加载。
+
+27.TableViewRow的click事件，e.source不总是row对象，可能是row内容的子元素，e.row才是row对象。
+
+27.多section的表格，虽然row的index编号并不管section，但使用deleteRow(rowIndex)时，总是删除第一个section的Row，故要删除某个section的row几乎没有办法（section的remove row也只能在其被加入表格前应用），幸好table还有delete section方法可用，可将某个要删除的row，放入一个section容器中，然后删除该section。顺便说，table内的元素实际上是数组，因为table是setData(data[...])方法形成的，因此，可用table.data[i]来定位其内的section或row(无section的情况)，如定位到无section的表格的最后一行：tableView.data[0].rowCount-1。（问题：可否理解为带section的table是多重数组的结构？）
+
+28.tabGroup中的tab有icon属性，可定义进行自定义，有几中常用的SystemIcon供使用。
+
+29.tab可设置badge值（数字），其作用其实就是红色的数字提醒，显示于其icon上。
+
+30.fireEvent有空值得研究一下：http://developer.appcelerator.com/question/135063/how-to-change-active-tab-icon
+
+31.自定义字体：http://developer.appcelerator.com/question/148609/alloy-custom-fonts-problem或http://developer.appcelerator.com/question/122586/working-cross-platform-custom-fonts
+
+32.iPhone Tabs for Android and Web: https://marketplace.appcelerator.com/apps/2507?754076556，自定义tabgroup bar:https://marketplace.appcelerator.com/apps/5029?1686862815(收费)，http://developer.appcelerator.com/question/148720/remove-tabgroup-gloss-effect-in-ios（免费），模拟tabgroup：https://gist.github.com/sachin26thakur/e8ab64d86ad76d9dc12f
+
+33.github上的模块一般在目录下的压缩包里：https://github.com/mpociot/TiCustomTab
+
+34.有时候，你不想设计小图标，可以用iPhone的符号字体：http://developer.appcelerator.com/question/146760/custom-font-glyph-as-tab-icon
+
+35.window默认背景即为transparent，但是无论怎么样，它都会有手机系统的黑色背景，即不可能出现一个窗口真正透明于另一个窗口之上。（后续发现，貌似如果窗口内有少量元素，其他地方为空，则貌似可以透过。什么道理？另外，有空研究下visiable设为false情况如何。再有，有时候一个地方设置事件过多，会导致UI反应滞后而显示不对。）
+
+36.用view做容器时，若其子view为imageview，会产生诸多诡异问题，改用label做容器即可。尤其是遍历时。
+
+37.不单是label，可以设置任何元素的透明度，包括图像，view组，哪怕原图或背景图非透明，也可以设置透明效果！
+
+38.移除iPhone appicon自动添加的高光效果，更改tiapp.xml中的：<prerendered-icon>true</prerendered-icon>即可，见：http://developer.appcelerator.com/question/29351/removing-glossy-effect-from-appicon-on-iphone
+
+39.iPhone UI 规格上，四个角的边缘圆角可设为2或3，按钮的圆角可设为5.
+
+40.窗口打开关闭时的左右滑进滑出效果，仅需设置打开或关闭时的animated属性即可。$.win.close({animated:true});
+
+41.scrollableView的view之间的间隙可简单地通过设置scrollableView的宽度大于设备屏宽即可，如width=330.(左右各间隔5)。
+
+41.得到scrollableView的当前view
+$.scrollableView.views[$.scrollableView.currentPage];
+
+42.backgroundColor:#70ffcc00,将呈现透明度为70%的背景色。
+
+42.用渐变可以直接给区块划单面或双面连线、阴影甚至立体效果：backgroundGradient: {
+        type: 'linear',
+        startPoint: { x: '50%', y: '0%' },
+        endPoint: { x: '50%', y: '100%' },
+        colors: [ { color: '#666', offset: 0.0},{ color: '#fff', offset: 0.025},{ color: '#eee', offset: 0.05}, { color: '#ccc', offset: 1.0 }],
+    } 
+
+43.textfield 与 label view均有padding属性，可用于间隔和排版。
+
+44.Ti.Media提供了截屏方法：Media
+
+45.openPhotoGallery或showCamera可选择媒体类型mediaTypes，0表示图片，1表示视频，同时，allowEditing为true的话，还可将图片裁切成正方型。
+
+46.Ti.UI.createOptionDialog的opts如设置destructive索引在0的位置，则该选项会由默认的白底黑框变为红底黑框。
+
+47.Alloy的createController方法可以进一步通过getView/getTopLevelViews/getViews获得相应的view，后两个得到的是数组，getView()方法通过设定参数为view的id（string类型）精确定位到某view。此外，可以通过不设参数得到其顶级view（一般为window），然后再通过window.children[number]精确定位其某子view.
+
+48.关于推送：
+(1) 在iOS开发者中心创建App时，appid必须为精确唯一ID，如com.xjp.timenote
+(2) 编绎时provisioning profile与APNS certification版本必须一致，如同为开发环境，同时，host必须为沙盒：gateway.push.apple.com，生产环境时则作相应更改
+(3) device token并非device UUID
+(4) 模拟器由于没有device token，因此，是无法测试push的。
+
+49.关于device_token
+(1) device_token由苹果apns根据注册时发送的appid与设备UUID组合生成，生成后不会轻易改变，即使软件卸载，重新注册，都不会改变，可能改变的情况：操作系统升级，apns自身算法做调整。此外，在同一台设备上同一个appid的应用，卸载后重装也无需重新注册，即使重新注册也无需用户确认（即不会弹出操作提示，为啥？？？）
+(2) 可在第一次注册apns服务后，即将device_token存入应用属性值中，不主动删除，当有此值时，不重新注册。不过，最好是每次启动都重新注册，否则callback函数将不起作用。
+(3) 按苹果官方说法，unregister不推荐使用，意义不大，除非你的应用更新后不再提供push服务
+(4) 对于有用户体系的应用，为适应用户在多处登录或退出情况，解决办法是将device_token与用户表绑定，登录或注册时写入device_token，退出时清楚device_token值（即设为""）
+(5) 对于用户未退出即卸载了应用，这时provider无法获知用户状态，为避免仍向此用户所在设备发送push信息，需由provider主动询问苹果feedback服务器，获得哪些device_token对应的设备已卸载应用从而已经失效，从而删除用户表中对应的device_token，从而不再做无效的推送（太多无法送达的推送有可能被苹果封IP！！！）
+
+49.震动API：Titanium.Media.vibrate();
+
+50.要在itunes系统中正确显示图标，需在asset-iphone文件夹中存放规格为512*512的iTunesArtwork图片文件。
+
+51.postlayout事情非常有用，当视图的位置或大小改变后，可相应的改变视图的交互，哪怕视图没有重新open或focus，比如，根据侧滑菜单是否弹出决定视图的table的scrollable属性。
+
+52.通过监听Ti.App.addEventListener('pause'/'paused'/'resume'/'resumed')事件来判断当前app是处于前景还是背景中。注：貌似不能监听resume事件，可能会覆盖pause与paused事件，靠谱的办法可能还是：http://developer.appcelerator.com/question/137917/how-to-know-if-the-app-resumes-from-tapping-a-push-notification, 解决完全关闭后>收到推送>打开与完全关闭后>打开>收到推送的矛盾的暂时的丑办法（setTimeout）：http://developer.appcelerator.com/question/136092/push-notification-callback-can-i-detect-if-a-user-is-in-the-app#comment-129449
+
+53.注册一个背景事件：http://developer.appcelerator.com/question/149747/which-event-can-i-listen-to-to-catch-incoming-apns-push-notification-when-app-in-background。
+
+54.如果某个controller-view要在全局用到，就在alloy.js里设置：Alloy.Globals.sharetome = Alloy.createController('sharetome').getView(); 不过，在自身controller里，仍以$.sharetome来表示自身。它并不会导致重复视图，说到底，Alloy.Globals.sharetome本身是引用它的。
+
+55.打开一个外部view, 除了var login = Alloy.createController('login').getView(); login.open()外，如果login本身controller里声明了，login.open()，则仅需Alloy.createController('login');
+
+55.dashboardView是一组可编辑可删除的icon，类似iphone的桌面，方法：http://developer.appcelerator.com/question/145935/dashboardview-without-delete-function
+
+56.非tabGroup和dashboardView的badge还是自己画吧。。。
+
+57.以后侧滑菜单还是考虑用tabGroup来实现，现在逻辑太乱了。
+
+58.要在后台运行时动态改变badge数量，要么设置背景任务(见：http://developer.appcelerator.com/question/149747/which-event-can-i-listen-to-to-catch-incoming-apns-push-notification-when-app-in-background)，要么把badge数量传到服务器管理。原因是：callback行为只有在应用重新打开或激活时才会发生（重要！！！）。尝试过背景服务，貌似也不行，有个notification的监听事情，本地的，远程的都可以监听，但是必须是点击了该条push，方才起作用。看来只能走服务端了。
+
+59.本地提醒和监听本地提醒：Ti.App.iOS.scheduleLocalNotification，Ti.App.iOS.addEventListener('notification',function(){})
+
+60.关于数据绑定，
+(1)Alloy.Models.instance("model")创建或获取全局（任何controller都可通过，任何view也均可绑定）单一（唯一）实例，
+(2)如在xml中定义instance实例，如<Model src="" id="" instance="true">，则创建的是仅供本controller使用，用$.来获取该实例，在xml中用{$.model.property}来获取属性。
+(3)可在alloy.js中定义Alloy.Models.model = Alloy.createModel("model")，则相当于定义了一个全局的model，同样在任何controller里都可以使用。
+(4) 在xml中，collection直接用{property}获取其值，model则必须用{model.property}.
+
+60.关于集合(collection)
+可在markup中创建全局集合，或仅本controller可得到的集合，方法如下：
+创建：<Collection src="feed" />
+通过：var feeds = Alloy.Collections.feed;
+绑定：<TableView dataCollection="feed">
+创建：<Collection id="localFeeds" src="feed" instance="true"/>
+通过：var feeds = $.localFeeds;
+绑定：<TableView dataCollection="$.localFeed">
+详见：http://docs.appcelerator.com/titanium/latest/#!/guide/Alloy_XML_Markup-section-35621528_AlloyXMLMarkup-CollectionElement
+及：http://developer.appcelerator.com/question/152519/prohibit-tableviewsection-repeats-on-alloy-databinding
+及：http://developer.appcelerator.com/question/145951/alloy-databinding
+
+61.扩展model或集合方法
+(1) 标准方法，如model的validate方法，collection的comparator方法，前者用于校验，后者用于排序，一旦定义，分别会在model保存和collection新添加模型时被自动调用（其中，validate还可以被isValid()方法调用）。
+(2) 自定义方法，如用以下方法自定义排序，然后在需要时调用，
+localComparator : function(feed) {
+	return feed.get('time');
+}
+当然也可以直接在controller里定义并调用：
+feeds.comparator = function(feed) { return feed.get("time")};
+
+61.关于model定义：
+(1)可以在config的defaults属性设置默认值，同时在columns属性的值除了设置列的类型外，还可加UNIQUE，PRIMIRY KEY(还可附加AUTOINCREMENT), NOT NULL，CHECK (uid < 5)等约束。extendModel里可以设置validate方法。
+(2)sqlite仅有TEXT与INTEGER两种数据类型，int会被转成INTEGER，bool,string等都会转成TEXT，要表示bool类型，可以存TEXT，值为0或1.
+(3)对于约束报错，alloy好像没有什么自动忽略的机制，只能try … catch … 来手动处理出错情况。
+(4)通过使用idAttribute可以避免alloy自动给每条数据加alloy_id属性，同时，貌似(3)的问题也能得到解决，因为idAttribute本身要求唯一，如果重复了，当然就会忽略掉。（但是if(model.save())怎么不行了？貌似还是不行，仍采用(3)的解决办法)
+
+61.关于idAttribute：
+在model的adapter处设置，值为model的某个不重复的属性，如id,title等。
+见：http://developer.appcelerator.com/question/147959/alloy--model-adapter-properties
+及：http://developer.appcelerator.com/question/149219/single-model-object
+
+62.如果一个controller-view，被其上级controller或顶级alloy.js引用（createController），则其controller代码会在引用时（即打开前）即被执行，因此，应注意将某些可能引起错误的代码封装。如Ti.App.Properties.getString()，但其值可能还不存在。且其后续再打开时将不再被执行。
+
+63.if…else if…else...不需要加return，多个并列if，可根据情况酌情加return.
+
+64.alloy内置了一些有用的模块，如moment,dialogs,animation
+
+65.关于键盘：autocapitalization:false,autocorrect: false,可以阻止默认大写键和自动更正，returnKeyType:Ti.UI.RETURNKEY_GO,returnKeyType:Ti.UI.RETURNKEY_NEXT,可以设定return样式（next, go），textfield,textarea的return事件可以设定return按下后的事件。enableReturnKey:true, suppressReturn: false, 分别可以时内容为空时或所有情况下不允许键盘被压下来。
+
+66.get方法发送请求后在iphone4-版本上出现parse json错误，不知何故。
+
+67.imageView采用toBlob()方法后可得到其width和height,貌似效率也还不错。
+
+68.纵观各大优质app，完全没有必要让statusbar隐藏，即全屏，甚至splash screen也无需全屏。
+
+69.如果整个app基本不用系统navbar，直接在tiapp.xml把这一项设为false即可，无需到每个窗口去这么做。
+
+69.用系统leftNavButton/rightNavButton的方法：
+<RightNavButton>
+	<Button id="rightButton" title="right" onClick="showAlert"/>
+</RightNavButton>
+
+70.窗口圆角不用通过UI设计实现，直接borderRadius更简单且更便于管理。大于一般为3.
+
+71.窗口淡入淡出效果：{modal:true,modalTransitionStyle:Titanium.UI.iPhone.MODAL_TRANSITION_STYLE_CROSS_DISSOLVE}
+原窗口卷页效果（非常酷！！！）：{modal:true,modalTransitionStyle:Titanium.UI.iPhone.MODAL_TRANSITION_STYLE_PARTIAL_CURL}
+注意在用第二个样式的时候，要加onBlur事件关闭modal窗口。
+
+72.onSingletap以后再也不要写成onSingleTap或onSingeltap了，这里经常出错！
+
+73.Ti.Platform.displayCaps.platformWidth，displayCaps莫写成DisplayCaps,否则出错。
+
+74.app.tss与特定的view.tss中定义的样子是累加关系，特定的样式只累加但不重写通用样式所设定的属性。
+[platform=ios formFactor=tablet]会继承通用（未设定平台）的样式，并重写定义为相同属性的值。
+
+75.resource里增加了info.plist后，改tiapp.xml属性可能会没用，要改info.plist才会生效，注意下。
+
+76.限制ipad屏幕旋转，在tiapp.xml中加：<orientations device="ipad"><orientation>Ti.UI.PORTRAIT</orientation></orientations>
+
+77.appname中文名：ios增加i18n文件夹，ituns增加info.plist文件。android增加platform文件夹.
+见：http://www.cnblogs.com/csdnangela/archive/2013/02/16/2913208.html
+
+
+===android===
+1.480*800分辨率下状态栏的高度为38，splash全尺寸不会往下压，而内页的全尺寸背景图则会往下压。所以splash做全尺寸，背景图则为480*762
+
+2.ScrollableView没有click事件，其singletap事件则仅在iOS下存在。
+
+3.android和iOS的click事件与singletap事件的反应速度正好相反。android下是click快，iOS下则是single tap快。
+
+4.webview禁止双击放大：<meta name="viewport" content="user-scalable=0">
+
+5.alloyg上web view使用local html时，应在app/assert目录建立资源，如webView目录（其他目录下均不行）。它将拷备至Resource文件夹。使用时：<WebView url="/webView/content.html"/>（注意：webView前的/必不可少，否则在android下会出错！！！）
+参见：http://developer.appcelerator.com/question/150840/local-webview-in-alloy
+官方：https://wiki.appcelerator.org/display/guides/The+WebView+Component#TheWebViewComponent-UsingLocalWebContentwithWebView
+webView与Ti动态交互：http://developer.appcelerator.com/question/148682/dynamic-content-in-webview-with-alloy
+注入本地CSS至外部html（相当棒！）：https://gist.github.com/dawsontoth/811993

@@ -1,0 +1,25 @@
+编辑器
+
+=====Textmate=====
+1.安装插件：
+cd /Applications/TextMate.app/Contents/SharedSupport/Bundles
+git clone https://github.com/kuroir/SCSS.tmbundle.git "SCSS.tmbundle"
+
+
+
+
+======Sumlime text======
+super + / 注释整行或多行（选中多行时）
+
+超酷插件
+Git:https://github.com/kemayo/sublime-text-2-git
+Coffeescript:https://github.com/Xavura/CoffeeScript-Sublime-Plugin.git
+sublime-better-coffeescript:https://github.com/aponxi/sublime-better-coffeescript/
+下面作用未知：
+CoffeeComplete Plus (Autocompletion)
+CoffeeScript Function Finder
+CoffeeCompile
+
+nodejs:https://github.com/tanepiper/SublimeText-Nodejs
+
+文件比较插件：sublimerge

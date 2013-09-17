@@ -1,0 +1,9 @@
+淘兜笔记
+
+1.npm install bower
+
+2.brew install redis
+
+3.别bower install masonry或jquery-masonry，会安装一大堆垃圾
+
+4.needle插件，加follow:true选项时可能发生“Encoding not recognized: 'UTF-8' (searched as: 'utf8')”的错误，见：https://github.com/tomas/needle/issues/22
