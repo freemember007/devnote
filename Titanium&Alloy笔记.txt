@@ -14,19 +14,49 @@ tita, titanium build（在tools里,貌似不能用）, titanium api, titanium se
 cd ~/Library/Application\ Support/Sublime\ Text\ 2/Packages/
 git clone git@github.com:tsteur/sublimetext-tita
 
+
+===谷歌地图V2 sha1获得===
+cd ~/.android
+创建：
+keytool -genkey -v -keystore debug.keystore -alias androiddebugkey -keyalg RSA -validity 10000
+keytool -genkey -v -keystore release.keystore -alias androidreleasekey -keyalg RSA -validity 10000
+MD5:
+keytool -list -alias androiddebugkey -keystore debug.keystore
+keytool -list -alias androidreleasekey -keystore release.keystore
+SHA1:
+keytool -list -v -keystore release.keystore
+//titanium专用：
+  keytool -list -v -keystore ~/Library/Application\ Support/Titanium/mobilesdk/osx/3.1.2.GA/android/dev_keystore
+
 ===使用terminal快速安装应用===
 1.快速打开terminal: 先在sublime2中安装terminal插件，编辑快捷键设置为super+alt+shift+i, 即可在项目根目录打开terminal。
 2.保存长命令：在项目根目录vi i.sh，输入以下内容：
 ti build -p ios -T device -V "xiao jiang ping (N6HWBG675D)" -P EE20F27B-E6B9-4670-A756-7F38C4EB0026
 3.以后直接运行命令sh i.sh即可执行。
 更妙的办法：super+shift+p,搜索terminal setting-default, 设置 "terminal": "Terminal.sh", 修改Terminal.sh文件为：CD_CMD="cd "\\\"$(pwd)\\\"" && clear && ti build -p ios -T device -V 'xiao jiang ping (N6HWBG675D)' -P EE20F27B-E6B9-4670-A756-7F38C4EB0026 "
-4.更妙的办法：直接改tita插件的核心文件：Tita.py
+4.更妙的办法：直接改tita插件的核心文件：(改Default (OSX).sublime-keymap和Tita.py这两个文件),其中Tita.py改动如下：
+if ('iphone' == device and 'device' == target):
+    cmd = u"ti build -p %s -T %s -V 'xiao jiang ping (N6HWBG675D)' -P B4EA9CAA-17C6-4978-82AD-D7B49E7B75FE --log-level %s" % (device, target, loglevel)
+if (('iphone' == device or 'ipad' == device) and 'simulator' == target):
+    cmd = u"titanium build -p ios -F %s -T %s --log-level %s" % (device, target, loglevel)
+if ('android' == device):
+    androidsdkpath = self.android_sdk_path()
+    cmd = u"titanium build -p %s -T %s -A ~/AndroidSDK -S WVGA800 --log-level %s" % (device, target, loglevel)
+另，把else下的内容注释掉。
+Default (OSX).sublime-keymap加：
+{
+    "keys": ["super+alt+o"], "command": "tita", "args": {"device": "iphone", "target": "device"} 
+},
 
 ===Titanium及alloy命令行===
 1.ti setup定位基本设置，其中最重要的是定义android sdk path: ~/AndroidSDK
 2.ti build -p android -S WVGA800 -A ~/AndroidSDK -T device(-p等于--platform,-T等于--target(仅android有此选项),注意大小写)
 参考：http://docs.appcelerator.com/titanium/latest/#!/guide/Titanium_Command-Line_Interface_Reference-section-35619828_TitaniumCommand-LineInterfaceReference-Build
 3.注意：alloy run已被ti build替换，alloy命令行主要提供程序脚手架（new, generate）,而ti最主要的则是用做build
+
+===最重要的学习资源====
+1.https://github.com/appcelerator/alloy （参考readme的安装方法）;
+2.https://github.com/appcelerator/KitchenSink （clone到本地后安装）
 
 ===开发经验总结===
 1.iphone模拟器下sqlite文件地址：
@@ -38,6 +68,7 @@ iphone1:https://github.com/sideshowcoder/jpgcompressor
 iphone2:https://github.com/gudmundurh/titanium-imaging
 官方：https://github.com/appcelerator/titanium_modules/tree/master/imagefactory/mobile
 模块使用方法：http://docs.appcelerator.com/titanium/latest/#!/guide/Using_Titanium_Modules
+全局模块可放置于该目录下：/Library/Application Support/Titanium/modules/
 
 3.android下的提醒元素用于事件完成后提醒，比如发布成功，比alert好：Notification
 
@@ -47,6 +78,9 @@ var service = Ti.App.iOS.registerBackgroundService({url:'bg.js'});
 5.此input样式不错：
 borderStyle: Titanium.UI.INPUT_BORDERSTYLE_BEZEL,
 borderColor:"#ccc",
+
+5.阻止android下textField自动focus:
+http://developer.appcelerator.com/question/157618/i-want-to-remove-its-auto-focus-of-textarea-and-searchbar-android
 
 6.为了窗口能有navbar,用modal window，但它关闭后打开另一窗口不成，改用只有一个tab的tabGroup可以，但出现另一问题，即底部显示一条tabGroup区域，解决办法：
 在window中设tabBarHidden:true 注：1.仅适用iPhone，2.不是在tabGroup里。
@@ -111,6 +145,8 @@ win.open({transition: Titanium.UI.iPhone.AnimationStyle.CURL_DOWN})
 
 27.多section的表格，虽然row的index编号并不管section，但使用deleteRow(rowIndex)时，总是删除第一个section的Row，故要删除某个section的row几乎没有办法（section的remove row也只能在其被加入表格前应用），幸好table还有delete section方法可用，可将某个要删除的row，放入一个section容器中，然后删除该section。顺便说，table内的元素实际上是数组，因为table是setData(data[...])方法形成的，因此，可用table.data[i]来定位其内的section或row(无section的情况)，如定位到无section的表格的最后一行：tableView.data[0].rowCount-1。（问题：可否理解为带section的table是多重数组的结构？）
 
+27.tableView在scrollView中时，android下不可滚动，要使其能滚动，需设置scrollView的canCancelEvents: false。
+
 28.tabGroup中的tab有icon属性，可定义进行自定义，有几中常用的SystemIcon供使用。
 
 29.tab可设置badge值（数字），其作用其实就是红色的数字提醒，显示于其icon上。
@@ -118,6 +154,7 @@ win.open({transition: Titanium.UI.iPhone.AnimationStyle.CURL_DOWN})
 30.fireEvent有空值得研究一下：http://developer.appcelerator.com/question/135063/how-to-change-active-tab-icon
 
 31.自定义字体：http://developer.appcelerator.com/question/148609/alloy-custom-fonts-problem或http://developer.appcelerator.com/question/122586/working-cross-platform-custom-fonts
+注：3.1.2GA下不需要改
 
 32.iPhone Tabs for Android and Web: https://marketplace.appcelerator.com/apps/2507?754076556，自定义tabgroup bar:https://marketplace.appcelerator.com/apps/5029?1686862815(收费)，http://developer.appcelerator.com/question/148720/remove-tabgroup-gloss-effect-in-ios（免费），模拟tabgroup：https://gist.github.com/sachin26thakur/e8ab64d86ad76d9dc12f
 
@@ -128,6 +165,8 @@ win.open({transition: Titanium.UI.iPhone.AnimationStyle.CURL_DOWN})
 35.window默认背景即为transparent，但是无论怎么样，它都会有手机系统的黑色背景，即不可能出现一个窗口真正透明于另一个窗口之上。（后续发现，貌似如果窗口内有少量元素，其他地方为空，则貌似可以透过。什么道理？另外，有空研究下visiable设为false情况如何。再有，有时候一个地方设置事件过多，会导致UI反应滞后而显示不对。）
 
 36.用view做容器时，若其子view为imageview，会产生诸多诡异问题，改用label做容器即可。尤其是遍历时。
+
+36.引用本地图片时，android下，图片名称前要加"/"，iOS下可加可不加。
 
 37.不单是label，可以设置任何元素的透明度，包括图像，view组，哪怕原图或背景图非透明，也可以设置透明效果！
 
@@ -153,6 +192,8 @@ $.scrollableView.views[$.scrollableView.currentPage];
 
 43.textfield 与 label view均有padding属性，可用于间隔和排版。
 
+44.android下imageview里套label,label无法显示，ios下可以。
+
 44.Ti.Media提供了截屏方法：Media
 
 45.openPhotoGallery或showCamera可选择媒体类型mediaTypes，0表示图片，1表示视频，同时，allowEditing为true的话，还可将图片裁切成正方型。
@@ -160,6 +201,8 @@ $.scrollableView.views[$.scrollableView.currentPage];
 46.Ti.UI.createOptionDialog的opts如设置destructive索引在0的位置，则该选项会由默认的白底黑框变为红底黑框。
 
 47.Alloy的createController方法可以进一步通过getView/getTopLevelViews/getViews获得相应的view，后两个得到的是数组，getView()方法通过设定参数为view的id（string类型）精确定位到某view。此外，可以通过不设参数得到其顶级view（一般为window），然后再通过window.children[number]精确定位其某子view.
+在xml中require的对象也可以设ID，再通过$.ID.getView('ID')精确得到其子view。
+getView('ID').getView('ID').getView('ID')可以一直getView下去。
 
 48.关于推送：
 (1) 在iOS开发者中心创建App时，appid必须为精确唯一ID，如com.xjp.timenote
@@ -238,15 +281,25 @@ feeds.comparator = function(feed) { return feed.get("time")};
 
 62.如果一个controller-view，被其上级controller或顶级alloy.js引用（createController），则其controller代码会在引用时（即打开前）即被执行，因此，应注意将某些可能引起错误的代码封装。如Ti.App.Properties.getString()，但其值可能还不存在。且其后续再打开时将不再被执行。
 
+63.Ti.App.Properties一定要注意大小写，App, Propertise, 都必须首字母大写，否则在android下出错！！！
+
 63.if…else if…else...不需要加return，多个并列if，可根据情况酌情加return.
 
-64.alloy内置了一些有用的模块，如moment,dialogs,animation
+64.alloy内置了一些有用的模块，如moment,dialogs,animation, 动画值得一试！！！
 
 65.关于键盘：autocapitalization:false,autocorrect: false,可以阻止默认大写键和自动更正，returnKeyType:Ti.UI.RETURNKEY_GO,returnKeyType:Ti.UI.RETURNKEY_NEXT,可以设定return样式（next, go），textfield,textarea的return事件可以设定return按下后的事件。enableReturnKey:true, suppressReturn: false, 分别可以时内容为空时或所有情况下不允许键盘被压下来。
 
 66.get方法发送请求后在iphone4-版本上出现parse json错误，不知何故。
 
 67.imageView采用toBlob()方法后可得到其width和height,貌似效率也还不错。
+
+67.android下post image时，如果image是定义的路径，则无法post，需要事先设定：
+$.avatar.image =
+Ti.Filesystem.getFile(Ti.Filesystem.resourcesDirectory, '/images/default_avatar.jpg').read();
+然后post $.avatar.image即可。
+ios下不存在此问题。
+
+68.要得到物件的非输入（显示定义的）宽度和高度，及x,y点，需监听postlayout事件，e.source.rect.height/width/x/y.
 
 68.纵观各大优质app，完全没有必要让statusbar隐藏，即全屏，甚至splash screen也无需全屏。
 
@@ -272,11 +325,14 @@ feeds.comparator = function(feed) { return feed.get("time")};
 
 75.resource里增加了info.plist后，改tiapp.xml属性可能会没用，要改info.plist才会生效，注意下。
 
+75.tiapp.xml中<modules/>为空时不能打开为<modules></modules>modules>，否则android下编译会出错。
+
 76.限制ipad屏幕旋转，在tiapp.xml中加：<orientations device="ipad"><orientation>Ti.UI.PORTRAIT</orientation></orientations>
 
 77.appname中文名：ios增加i18n文件夹，ituns增加info.plist文件。android增加platform文件夹.
 见：http://www.cnblogs.com/csdnangela/archive/2013/02/16/2913208.html
 
+88.关于文件系统，如文件名存在，则创建同名文件会失败。记住，这可能常常是产生问题的原因。
 
 ===android===
 1.480*800分辨率下状态栏的高度为38，splash全尺寸不会往下压，而内页的全尺寸背景图则会往下压。所以splash做全尺寸，背景图则为480*762
@@ -287,8 +343,78 @@ feeds.comparator = function(feed) { return feed.get("time")};
 
 4.webview禁止双击放大：<meta name="viewport" content="user-scalable=0">
 
-5.alloyg上web view使用local html时，应在app/assert目录建立资源，如webView目录（其他目录下均不行）。它将拷备至Resource文件夹。使用时：<WebView url="/webView/content.html"/>（注意：webView前的/必不可少，否则在android下会出错！！！）
+5.android下webview的大小会自动随其内容大小而调整，iOS下则会占用整个窗口，要达到android的效果，需要加height: Ti.UI.SIZE。
+此外，font-size需做定义，否则会自动缩放。此外<meta name="viewport" content="width=device-width, user-scalable=no">这句话不可少。
+
+6.alloyg上web view使用local html时，应在app/assert目录建立资源，如webView目录（其他目录下均不行）。它将拷备至Resource文件夹。使用时：<WebView url="/webView/content.html"/>（注意：webView前的/必不可少，否则在android下会出错！！！）
 参见：http://developer.appcelerator.com/question/150840/local-webview-in-alloy
 官方：https://wiki.appcelerator.org/display/guides/The+WebView+Component#TheWebViewComponent-UsingLocalWebContentwithWebView
 webView与Ti动态交互：http://developer.appcelerator.com/question/148682/dynamic-content-in-webview-with-alloy
 注入本地CSS至外部html（相当棒！）：https://gist.github.com/dawsontoth/811993
+
+7.使用录音模块（com.tush.android.mediarecorder）时出现setAudioSource错误，问题是没有设定权限，具体是在Tiapp.xml(或模块根目录下的timodule.xml文件)设置：
+<android xmlns:android="http://schemas.android.com/apk/res/android">
+    <application></application>
+    <manifest>
+        <uses-permission android:name="android.permission.RECORD_AUDIO" />      
+        <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />        
+        <uses-permission android:name="android.permission.WRITE_INTERNAL_STORAGE" />        
+    </manifest>
+</android>
+
+8.让长度单位为物理长度，以简化适配工作：
+<property name="ti.ui.defaultunit" type="string">dp</property>
+
+9.使用titanium_tabgroup.xml自定义android tabgroup的方法在3.0.0GA以上已经官方确认不支持了，悲剧！！！
+
+
+
+=====iPhone=====
+1.当应用在模拟器上运行正常，但在iPhone下停止在Splash画面（Splash screen freeze on iPhone device）时，可能是sdk问题，3.1.2GA与alloy1.0曾出此问题。改3.0.0和1.3.0后解决。
+
+2.改3.0.0和1.3.0后，需要在本地模拟器运行后再安装至手机才行。待解决。改3.1.2或1.3.0后，即使模拟器运行了手机也不更新。
+（问题搞清了，alloy根本没有1.3.0, 截止目前20130929，最高版本才1.2.2，因此，可能用的最小版本，导致编译有问题。）
+
+3.但3.0.0版本下经常出session问题。
+
+4.后改3.1.2和1.2.2后，恢复正常，期间关闭了titanium studio，估计可以跟它有一定关系。
+
+5.if(OS_IOS)与if(OS_ANDROID)的判断失效可能也跟sdk版本有关。后来发现不是，两个条件下面不能出现同名的匿名函数，否则会冲突，必须用：
+var func = function(){}
+
+5.最终实践证明，3.1.2配合1.2.2是非常稳定和可靠的。。。再不要折腾了。。。
+
+
+
+===== Android模块开发 ======
+1.安装ndk: http://dl.google.com/android/ndk/android-ndk-r8-darwin-x86.tar.bz2
+(注意：ndk 9r不行，https://jira.appcelerator.org/browse/TIMOB-15263)
+
+2.~/Library/Application\ Support/Titanium/mobilesdk/osx/3.1.2.GA/titanium.py create --platform=iphone --type=module --dir=~ --name=tiModuleTest --id=com.xjp.tiModuleTest --android=~/AndroidSDK
+
+3.修改build.properties:
+android.ndk=/Users/xjp/android-ndk-r8
+
+3.ant run或ant run.emulator
+
+4.如果你运行对象是超时，试着找到emulator，然后通过以下命令重启ADB服务：
+~/AndroidSDK/platform-tools/adb kill-server
+~/AndroidSDK/platform-tools/adb start-server
+
+5.tabGroup的exitOnClose属性默认为true，即tabGroup被创建为root级元素，硬件返回或程序close方法关闭tabGroup时，应用即退出。如果在close事件后仍有事件，则会报“***应用已停止”的错误，解决办法：exitOnClose:false
+注意：窗口也有exitOnClose事件，但默认是false，可根据需要改为true
+
+===== iOS模块开发 ======
+1.流程
+~/Library/Application\ Support/Titanium/mobilesdk/osx/3.1.2.GA/titanium.py create --platform=iphone --type=module --dir=~ --name=tiModuleTest --id=com.xjp.tiModuleTest
+
+此步不用：
+~/Library/Application\ Support/Titanium/mobilesdk/osx/3.1.2.GA/iphone/builder.py
+
+cd tiModuleTest
+
+~/Library/Application\ Support/Titanium/mobilesdk/osx/3.1.2.GA/titanium.py run
+
+项目开发完毕后，生成zip包：
+build.py
+
