@@ -1,0 +1,6 @@
+1.CSS文件里引用本地图片时，路径需为相对：
+background: url('../images/pin.jpg') no-repeat 0 0;
+直接在html里写style则可以为绝对路径：
+style="background:url(images/pin.jpg) no-repeat;"
+原理：html在顶层，但css文件在二级
+注：路径的引号加不加都可以。

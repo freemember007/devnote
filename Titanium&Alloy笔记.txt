@@ -15,6 +15,46 @@ cd ~/Library/Application\ Support/Sublime\ Text\ 2/Packages/
 git clone git@github.com:tsteur/sublimetext-tita
 
 
+
+===iOS打包测试===
+除了直接通过titanium ide安装（连接iphone，在xcode中加入device，itunes同步）外，还可以通过adhoc方式安装。
+具体为通过adhoc方式生成ipa或app,从developer.apple.com下载mobile provision(adhoc证书)文件（包含了测试人的device），一块儿发给测试人。
+参见：http://www.cocoachina.com/bbs/simple/?t55134.html
+
+ios应用升级时，先在itunes conection里加新版本，设置为等待上传。然后改tiapp.xml或info.plist里的版本号，打包上传。
+
+
+
+===android 分发至 google play===
+1.注册开发者帐号，付费
+2.release签名：
+keytool -genkey -v -keystore shou65app-release.keystore -alias shou65app-release -keyalg RSA -keysize 2048 -validity 10000
+参考：http://developer.android.com/tools/publishing/app-signing.html#setup
+3.使用sdk提供的工具测试apk:
+AndroidSDK/platform-tools/aapt dump badging Desktop/shou65app.apk
+(1) ERROR getting ‘android:icon’ attribute: attribute is not a string value
+产生原因：AndroidManifest.xml有误
+解决办法：将第一处label="@string/appname"改为label="Shou65"(应用运行时出错提供的名字，如“Shou65已停止运行”)。（注：第二处为应用名）
+
+有说需要在drawable下加appicon.png(96*96)的文件，测试后发现可有可无
+另参考：
+http://www.cnblogs.com/chuckTsao/archive/2013/01/04/2843688.html
+http://developer.appcelerator.com/question/148691/upload-apk-rror-getting-androidicon-attribute-attribute-is-not-a-string-value
+http://stackoverflow.com/questions/7474526/error-getting-androidicon-attribute-attribute-is-not-a-string-value-when-t
+(2) 进行以上操作后，aapt检测发现appname本地化没有了（待解决）
+4.7寸与10寸平板截图
+编译模拟器型号：7寸为WXGA800-7in，10寸为WXGA800
+双击androidSDK/tools/ddms，选择目标模拟器，选择device/screen capture
+以上无效，限制支持的screen:
+<supports-screens android:anyDensity="true" android:xlargeScreens="false" android:largeScreens="true" android:normalScreens="true" android:smallScreens="true"/>
+参考：
+http://developer.appcelerator.com/question/143168/android-targetsdkversion-build-problem
+此外，根据谷歌开发者建议，在tiapp.xml中加：
+<uses-sdk android:minSdkVersion="11" android:targetSdkVersion="14"/>
+注：minSdkVersion="11"，targetSdkVersion="14"必须支持平板电脑
+注：<tool-api-level>10</tool-api-level>等同于<uses-sdk android:minSdkVersion="10"/>
+见：http://developer.android.com/distribute/googleplay/quality/tablet.html#android-versions
+
 ===谷歌地图V2 sha1获得===
 cd ~/.android
 创建：
@@ -27,6 +67,11 @@ SHA1:
 keytool -list -v -keystore release.keystore
 //titanium专用：
   keytool -list -v -keystore ~/Library/Application\ Support/Titanium/mobilesdk/osx/3.1.2.GA/android/dev_keystore
+
+
+===谷歌地图和定位===
+定位和原生地图调用都需要谷歌服务框架，故定位问题需写java模块，地图则可先通过webview解决。
+注意：webview的js引用需远程，本地的话测试情况能用，distribution版本就不行。
 
 ===使用terminal快速安装应用===
 1.快速打开terminal: 先在sublime2中安装terminal插件，编辑快捷键设置为super+alt+shift+i, 即可在项目根目录打开terminal。
@@ -47,6 +92,11 @@ Default (OSX).sublime-keymap加：
 {
     "keys": ["super+alt+o"], "command": "tita", "args": {"device": "iphone", "target": "device"} 
 },
+
+====android模拟器加速===
+brew install ccache
+export NDK_CCACHE=/usr/local/bin/ccache
+export NUM_CPUS=4 //cpu的核数
 
 ===Titanium及alloy命令行===
 1.ti setup定位基本设置，其中最重要的是定义android sdk path: ~/AndroidSDK
@@ -72,12 +122,21 @@ iphone2:https://github.com/gudmundurh/titanium-imaging
 
 3.android下的提醒元素用于事件完成后提醒，比如发布成功，比alert好：Notification
 
+4.android distribute后如要求重启，解决办法， 在tiapp.xml中加入：
+<property name="ti.android.bug2373.finishfalseroot" type="bool">true</property>
+
 4.注册后台服务：
 var service = Ti.App.iOS.registerBackgroundService({url:'bg.js'});
 
 5.此input样式不错：
 borderStyle: Titanium.UI.INPUT_BORDERSTYLE_BEZEL,
 borderColor:"#ccc",
+
+5.除了设置object.attr= 外，属性还可以这样：
+title.applyProperties({
+    shadowColor: '#eee',
+    shadowOffset: { x: 0, y: 1 },
+});
 
 5.阻止android下textField自动focus:
 http://developer.appcelerator.com/question/157618/i-want-to-remove-its-auto-focus-of-textarea-and-searchbar-android
@@ -98,6 +157,10 @@ https://github.com/tsteur/sublimetext-tita
 9.Alloy编译时，会寻找index.js(.xml.tss)将其作为应用主入口写进app.js，同时，alloy.js内的代码也会在编译(运算)后copy至app.js，对于要判断情景给入不同主入口的情况，可以在index内使用if判断。比较好的做法是用index做loading或数据准备。
 
 10.注意，重复元素，如tablesection, tablerow，即使定义了id，也无法用$.id选择。
+
+11.查看alloy编译后的文件，会发现，里面没有class，故alloy选择器只能选择id, 同样，事件属性e.source.class是不存在的。
+
+12.令人兴奋的是，alloy ID选择器（$）支持动态赋与ID名，即$[e.source.id + 'Label']也是有效的。
 
 11.Titanium本身有内置的图片处理函数（支持imageAsCropped、imageAsResized、imageAsThumbnail、imageWithAlpha、imageWithTransparentBorder等诸多常用功能！）：http://developer.appcelerator.com/question/149134/imagefactory-version
 
@@ -126,18 +189,42 @@ http://developer.appcelerator.com/question/145004/how-can-i-get-currentwindow-wh
 http://developer.appcelerator.com/question/34951/statusbar-style-node
 但在alloy.js中写则可直接生效：http://developer.appcelerator.com/question/51801/status-bar-style-and-14
 要实现statusbar半透明，貌似必须用hacker方法(设置窗口或tabgroup的top:-20,bottom:-49,)：http://developer.appcelerator.com/question/138504/ios-statusbar-transparent
+还是tiapp.xml中设置最简单，管用：<statusbar-style>opaque</statusbar-style>
 
 21.iPhone有很多很好的自带的UI风格，如窗口打开风格：
 win.open({transition:Titanium.UI.iPhone.AnimationStyle.FLIP_FROM_RIGHT})
 win.open({transition: Titanium.UI.iPhone.AnimationStyle.CURL_DOWN})
 
+22.android window open动画：
+var win2 = Ti.UI.createWindow({fullscreen:false});
+win2.open({
+    activityEnterAnimation: Ti.Android.R.anim.slide_in_left,
+    activityExitAnimation: Ti.Android.R.anim.slide_out_right
+});
+更多Ti.Android.R.anim效果见：http://developer.android.com/reference/android/R.anim.html
+
 22.window的title可以用titleControl自定义
 
+22.verticalAlign对android和ios都适用，有时候感觉没有效果最常见的原因是：
+(1) 其高度大于母view
+(2) 这个排列是针对view内的text，而非view对于其母view.
+
 23.headPullView里面需放一个View方可，否则什么都不会显示。
+
+23.android pull2refresh解决方案有两个(两个都有效，酌情使用)：
+https://gist.github.com/jpurcell/903895 (通过将table套在scrollView中实现)
+方案一注：有时间可以依此写自己写一个兼容ios与android的版本。
+https://github.com/FokkeZB/nl.fokkezb.pullToRefresh/releases（也可以直接git clone项目）
+方案二注：
+(1) 在android下，如果是自定义navbar，则table应套在一个view中（不一定要scrollView）。view的top为navbar的高度。table的top则为0或不设。原因在于可能headerPullView与headerView的行为不同。
+(2) 在android下，拖动不是很流畅。恐怕得根据方案一重写一个。
 
 24.中文字体也可以使用fontWeight:"bold"显示为加粗。
 
 25.在使用Alloy.createController传递的变量不仅可以传递普通变量，还可以传递View或函数，View用$.表示即可，函数则不带括号，运行时带括号即可。相应的，Alloy.Globals除子可以定义全球View外，也可以定义全球函数，定义和使用方法跟Alloy.createController类似。
+
+25.在xml中require view或widget，等价于在controller中createController，通过在require/widget行中声明someAttr = someValue，等价于通过createController传递变量。
+注：在widget.js中引用view的方法为:$.view.ID
 
 26.列表row设置className为i(某自然增长变量)，可加速列表的加载。
 
@@ -146,6 +233,8 @@ win.open({transition: Titanium.UI.iPhone.AnimationStyle.CURL_DOWN})
 27.多section的表格，虽然row的index编号并不管section，但使用deleteRow(rowIndex)时，总是删除第一个section的Row，故要删除某个section的row几乎没有办法（section的remove row也只能在其被加入表格前应用），幸好table还有delete section方法可用，可将某个要删除的row，放入一个section容器中，然后删除该section。顺便说，table内的元素实际上是数组，因为table是setData(data[...])方法形成的，因此，可用table.data[i]来定位其内的section或row(无section的情况)，如定位到无section的表格的最后一行：tableView.data[0].rowCount-1。（问题：可否理解为带section的table是多重数组的结构？）
 
 27.tableView在scrollView中时，android下不可滚动，要使其能滚动，需设置scrollView的canCancelEvents: false。
+
+27.将一个tableView放入一个View中，它的滚动就变得很不平滑了。。。
 
 28.tabGroup中的tab有icon属性，可定义进行自定义，有几中常用的SystemIcon供使用。
 
@@ -166,6 +255,15 @@ win.open({transition: Titanium.UI.iPhone.AnimationStyle.CURL_DOWN})
 
 36.用view做容器时，若其子view为imageview，会产生诸多诡异问题，改用label做容器即可。尤其是遍历时。
 
+36.关于imageView
+(1) imageView在iOS和android下则必须同时指定高宽才会放大，否则，最大显示原图。由于tss不支持运算式，同时指定高宽一般需在js中指定。
+(2) iamgeView放在scrollView里，iOS下可以放大撑满，多余部分不显示，android下则不会撑大。
+(3) imageAsResized和imageAsCropped要么是不能放大，要么是它的单位固定为px，不随系统定义而改变。(+dp后还是，故考虑真不能放大。至少imageAsResized是这样，不过，当取极大图时也是这样，太诡异了！！！)
+(4) ios下可以通过imageAsResized后放入scrollView里解决图片大小和比例问题，但android上效率太低。，
+postlayout???
+
+
+
 36.引用本地图片时，android下，图片名称前要加"/"，iOS下可加可不加。
 
 37.不单是label，可以设置任何元素的透明度，包括图像，view组，哪怕原图或背景图非透明，也可以设置透明效果！
@@ -182,6 +280,12 @@ win.open({transition: Titanium.UI.iPhone.AnimationStyle.CURL_DOWN})
 $.scrollableView.views[$.scrollableView.currentPage];
 
 42.backgroundColor:#70ffcc00,将呈现透明度为70%的背景色。
+
+42.disable selectedBackgroundColor，在app.tss中设置TableViewRow的属性:
+iOS下（在titanium api中，selectedBackgroundColor适用于ios&&android，但实际上android已经弃用了）
+selectionStyle: Titanium.UI.iPhone.TableViewCellSelectionStyle.NONE
+对应安卓下：
+backgroundSelectedColor: "transparent"
 
 42.用渐变可以直接给区块划单面或双面连线、阴影甚至立体效果：backgroundGradient: {
         type: 'linear',
@@ -205,6 +309,8 @@ $.scrollableView.views[$.scrollableView.currentPage];
 getView('ID').getView('ID').getView('ID')可以一直getView下去。
 
 48.关于推送：
+证书生成前的钥匙串生成见：http://iphone.tgbus.com/dev/iosdev/201205/20120523110841.shtml
+生成pem: http://2015.iteye.com/blog/1567777
 (1) 在iOS开发者中心创建App时，appid必须为精确唯一ID，如com.xjp.timenote
 (2) 编绎时provisioning profile与APNS certification版本必须一致，如同为开发环境，同时，host必须为沙盒：gateway.push.apple.com，生产环境时则作相应更改
 (3) device token并非device UUID
@@ -287,6 +393,13 @@ feeds.comparator = function(feed) { return feed.get("time")};
 
 64.alloy内置了一些有用的模块，如moment,dialogs,animation, 动画值得一试！！！
 
+65.alloy使用backbone的事件代理：
+可以在然require的view上绑定自定义事件，然后在该view内部设置trigger该事件。见轻阅读app的侧滑menu实现，或见：
+http://developer.appcelerator.com/question/150110/alloy-views
+
+66.被require的view内部可以exports方法，这样，通过在母view中设定自身id后，母view可以通过$.id.method，调用该view的方法。见：
+http://developer.appcelerator.com/question/144078/alloy-id-selection--issue
+
 65.关于键盘：autocapitalization:false,autocorrect: false,可以阻止默认大写键和自动更正，returnKeyType:Ti.UI.RETURNKEY_GO,returnKeyType:Ti.UI.RETURNKEY_NEXT,可以设定return样式（next, go），textfield,textarea的return事件可以设定return按下后的事件。enableReturnKey:true, suppressReturn: false, 分别可以时内容为空时或所有情况下不允许键盘被压下来。
 
 66.get方法发送请求后在iphone4-版本上出现parse json错误，不知何故。
@@ -331,6 +444,12 @@ ios下不存在此问题。
 
 77.appname中文名：ios增加i18n文件夹，ituns增加info.plist文件。android增加platform文件夹.
 见：http://www.cnblogs.com/csdnangela/archive/2013/02/16/2913208.html
+***注意***：
+(1) ios的i18n的中文文件夹名必须为zh_CN，而不能仅为zh！
+(2) 但这样android编绎又会出问题，解决办法：
+http://developer.appcelerator.com/question/148383/language-code-if-include-country-code
+http://developer.appcelerator.com/question/141066/language-code-for-chinese
+(3) AndroidManifest.xml放在android目录下，而非res目录下，切记！！！
 
 88.关于文件系统，如文件名存在，则创建同名文件会失败。记住，这可能常常是产生问题的原因。
 
@@ -384,11 +503,13 @@ var func = function(){}
 
 5.最终实践证明，3.1.2配合1.2.2是非常稳定和可靠的。。。再不要折腾了。。。
 
-
+6.ios7默认是全屏的，状态bar透明于window顶部，要解决兼容必须使用3.1.3GA，兼调全局window的top,statusBarStyle
 
 ===== Android模块开发 ======
 1.安装ndk: http://dl.google.com/android/ndk/android-ndk-r8-darwin-x86.tar.bz2
 (注意：ndk 9r不行，https://jira.appcelerator.org/browse/TIMOB-15263)
+
+2.若Android SDK无法下载，是因为dl-ssl.google.com被墙，在hosts增加74.125.237.1 dl-ssl.google.com即可。备用ip：173.194.72.136 
 
 2.~/Library/Application\ Support/Titanium/mobilesdk/osx/3.1.2.GA/titanium.py create --platform=iphone --type=module --dir=~ --name=tiModuleTest --id=com.xjp.tiModuleTest --android=~/AndroidSDK
 
@@ -403,6 +524,12 @@ android.ndk=/Users/xjp/android-ndk-r8
 
 5.tabGroup的exitOnClose属性默认为true，即tabGroup被创建为root级元素，硬件返回或程序close方法关闭tabGroup时，应用即退出。如果在close事件后仍有事件，则会报“***应用已停止”的错误，解决办法：exitOnClose:false
 注意：窗口也有exitOnClose事件，但默认是false，可根据需要改为true
+
+6.退出不停止在splash窗口的终极办法：
+$.login.addEventListener('androidback',function(){
+    var activity = Titanium.Android.currentActivity; 
+    activity.finish();
+})
 
 ===== iOS模块开发 ======
 1.流程

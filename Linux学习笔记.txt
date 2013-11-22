@@ -1,5 +1,9 @@
 1.查看/杀死应用进程
-pgrep mongod/crond/ruby/nodejs
+复杂搞法：
+ps aux | grep Jing
+kill -9 pid
+简单搞法：
+pgrep mongod/crond/ruby/nodejs（此步非必须）
 killall mongod/crond/ruby/nodejs
 
 2.crontab
