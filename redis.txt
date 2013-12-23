@@ -7,7 +7,10 @@ Or, if you don't want/need launchctl, you can just run:
 
 
 
-redis-cli：打开命令行
+=== redis-cli：打开命令行 ===
+
+1.命令行传送的都是string，客户端收到后需要进行JSON.parse解析，传送对象的正确格式是：
+publish messages "{\"nickname\":\"free\", \"message\": 5}
 
 redis-server：查看服务状态
 
@@ -16,3 +19,21 @@ http://koda.iteye.com/blog/1257616
 
 命令行：
 http://blog.csdn.net/wf1982/article/details/7209083
+
+
+设置开机启动：
+launchctl load ~/Library/LaunchAgents/homebrew.mxcl.redis.plist
+如出现LaunchAgents: Not a directory错误，则：
+http://serverfault.com/questions/221469/i-can-not-cd-launchagents-on-macbook
+
+appfog连接redis:
+https://github.com/lhitchon/resque-example/blob/master/web/lib/appfog-service.js#L10
+if (process.env.VCAP_SERVICES) {
+	var services = JSON.parse(process.env.VCAP_SERVICES);
+	credentials = services['redis-2.2'][0].credentials;
+	var redis_port = credentials.port;
+	var redis_host = credentials.host;
+	var redis_password = credentials.password;
+	client = redis.createClient(redis_port, redis_host);
+	client.auth(redis_password);
+}

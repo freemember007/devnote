@@ -1,10 +1,14 @@
+1.mac下安装windows:
+http://www.parallels.com/cn/products/desktop/
+www.vmware.com/cn/products/fusion/
+
 1.查看/杀死应用进程
 复杂搞法：
 ps aux | grep Jing
 kill -9 pid
 简单搞法：
-pgrep mongod/crond/ruby/nodejs（此步非必须）
-killall mongod/crond/ruby/nodejs
+pgrep mongod/crond/ruby/node（此步非必须）
+killall mongod/crond/ruby/node
 
 2.crontab
 ntsysv：查看是否开机启动

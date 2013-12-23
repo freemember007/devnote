@@ -14,6 +14,41 @@ $('a:contains('+index.toString()+'):last').map(function(){if ($(this).text() == 
 
 5.tbody[id^=normalthread] a.xst
 
+====== DOM对象属性与值 ======
+1.value在jqurey下为val()
+document.getElementById("input").value
+$("#input").val()
+
+====== 滚动 ======
+1.滚动到底部
+最简单：
+window.scrollTo(0, 9999)
+动画实现
+$('body,html').animate({ scrollTop: $("#J_sendtext").offset().top-$(window).height()+80 }, 'slow');
+参考：http://stackoverflow.com/questions/4249353/jquery-scroll-to-bottom-of-the-page
+
+====== ajax ======
+1.获取远程text，用作dot模板:
+  $.ajax({
+    type: "get",
+    dataType: "html",
+    url: "javascript/tmpl/_message.html",
+    data: {},
+    success: function(response) {
+      var tmpl = doT.template(response);
+      $("#J_messages").append(tmpl({content: $("#J_sendBox").val()}));
+    },
+  });
+见：http://stackoverflow.com/questions/1034881/what-is-the-best-practice-for-parsing-remote-content-with-jquery
+更好的办法：
+  $.get('javascript/tmpl/_message.html', function(response) {
+     var tmpl = doT.template(response);
+      $("#J_messages").append(tmpl({content: $("#J_sendBox").val()}));
+  }, 'text');
+见：http://stackoverflow.com/questions/10112509/reading-a-text-file-with-jquery
+
+
+
 ====== 跨域 ======
 1.不同子域，服务器可控的情况
 (1) iframe

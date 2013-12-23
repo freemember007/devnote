@@ -1,0 +1,6 @@
+1.room拥有自动创建和销毁机制，见：
+The rooms are created and destroyed automatically. When you start your
+server and somebody connects to it, there should be a single room
+("/"). If you make socket.join("room1") - the "room1" room will be
+created. If you make socket.leave("room1") and no other users are
+connected to this room - it will be destroyed. 

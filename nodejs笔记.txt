@@ -42,9 +42,18 @@ mongod --dbpath=/data/db --logpath=/tmp/mongod.log --fork
 
 3.安装并使用服务器管理工具forever(后台daemon启动)（（遗留问题：如何开机启动？））
 npm install forever -g -d
-NODE_ENV=production forever start app.js
-开发环境：forever start app.js
+生产环境：NODE_ENV=production forever start app.js (注：加了个start，另环境变量如并无用到，也可不写)
+开发环境：forever app.js
+开发环境代码更改后自动重启 forever -w app.js
 停止服务：forever stopall
+查看日志列表：forever logs
+查看日志详情：tail -f /Users/apple/.forever/ZRek.log
+
+4.pm2 (目测不太稳定，先用forever吧)
+pm2 start app.js
+pm2 start app.js -i max (多个进程)
+pm2 startup 开机重启
+
 
 4.addListener与on是一样的。见：http://nodejs.org/api/events.html#events_emitter_addlistener_event_listener
 
@@ -70,5 +79,3 @@ http://appjs.org/ (此项目已经废了)
 类似：http://www.tidesdk.org/（前身为titanium desktop！开源后个人提炼的版本，不被看好）
 
 9.使用cron做定时任务
-
-10.

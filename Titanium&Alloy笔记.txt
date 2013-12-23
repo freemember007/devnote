@@ -10,11 +10,53 @@ alloy new
 git status, git add ., git commit -m 'create', git push orgin master(master可省略)
 
 ===sublime2插件Tita===
-tita, titanium build（在tools里,貌似不能用）, titanium api, titanium search(不可用)。
-如果搜索安装不到，可以：
+1.tita, titanium build（在tools里,貌似不能用）, titanium api, titanium search(不可用)。
+2.如果搜索安装不到，可以：
 cd ~/Library/Application\ Support/Sublime\ Text\ 2/Packages/
 git clone git@github.com:tsteur/sublimetext-tita
+3.解决android编译时出现以下错误的办法：
+/longjohn/index.js:111
+      throw e;
+            ^
+TypeError: Object true has no method 'trim'
+错误原因：sdk路径问题，在以下直接把androidsdkpath参数去掉即可。
+cmd = u"titanium build -p %s -T %s --log-level %s" % (device, target, loglevel)
 
+
+=== android背景服务 ===
+1.在tiapp.xml中加：
+<services>
+    <service url="myservice.js" type="interval"/>
+</services>
+注：如果指定了manifest，则需改manifest.
+2.编绎前最好在titanium studio里clean一下。
+3.myservice.js放在asset/android/下，lib/和platform/android/下则不行。
+4.调用service的indent的选项除url外，还有一个重要选项startMode，决定了应用被关闭后服务是否重启，见：
+http://docs.appcelerator.com/titanium/latest/#!/api/Titanium.Android-property-START_NOT_STICKY
+http://stackoverflow.com/questions/18612880/android-service-crashes-after-app-is-swiped-out-of-the-recent-apps-list
+5.判断是否背景运行恐怕还只能用window.focus&&blur的笨办法：
+http://developer.appcelerator.com/question/101951/application-foreground--background-event
+6.背景运行时，commenjs未注入Alloy，在alloy.js里require的commenjs也无法在controller里用。必须：
+Alloy =  require('alloy'); 将var varname = require('commonjs')改为：Varname = require('commenjs')
+见：http://developer.appcelerator.com/question/144351/alloy-is-undefined-in-android-lib-file
+http://docs.appcelerator.com/titanium/latest/#!/guide/Alloy_Debugging_and_Troubleshooting
+
+=== iOS背景服务 ===
+见：https://gist.github.com/kosso/867404
+
+
+=== adb连接真机调试 ===
+1.vi ~/.bash_profile
+export PATH=${PATH}:/Users/apple/androidSDK/platform-tools/
+adb shell
+logcat
+2.Unable to open log device '/dev/log/main':
+On call screen type *#*#2846579#*#* 
+3。adb logcat | grep com.shou65.app --color=auto
+
+
+=== socket.io ===
+1.端口为http时，默认心跳为1秒，为ws时，
 
 
 ===iOS打包测试===
@@ -28,8 +70,9 @@ ios应用升级时，先在itunes conection里加新版本，设置为等待上�
 
 ===android 分发至 google play===
 1.注册开发者帐号，付费
-2.release签名：
+2.release自签名：
 keytool -genkey -v -keystore shou65app-release.keystore -alias shou65app-release -keyalg RSA -keysize 2048 -validity 10000
+乱码问题：打开终端的设置，将默认字符集设为GB2312，最后一步按'y'回车。
 参考：http://developer.android.com/tools/publishing/app-signing.html#setup
 3.使用sdk提供的工具测试apk:
 AndroidSDK/platform-tools/aapt dump badging Desktop/shou65app.apk
@@ -43,7 +86,10 @@ http://www.cnblogs.com/chuckTsao/archive/2013/01/04/2843688.html
 http://developer.appcelerator.com/question/148691/upload-apk-rror-getting-androidicon-attribute-attribute-is-not-a-string-value
 http://stackoverflow.com/questions/7474526/error-getting-androidicon-attribute-attribute-is-not-a-string-value-when-t
 (2) 进行以上操作后，aapt检测发现appname本地化没有了（待解决）
+4.zipalign优化：
+http://blog.csdn.net/h3c4lenovo/article/details/9310265
 4.7寸与10寸平板截图
+模拟器下截图方法：http://blog.csdn.net/mrlixirong/article/details/6747706
 编译模拟器型号：7寸为WXGA800-7in，10寸为WXGA800
 双击androidSDK/tools/ddms，选择目标模拟器，选择device/screen capture
 以上无效，限制支持的screen:
@@ -93,6 +139,7 @@ Default (OSX).sublime-keymap加：
 {
     "keys": ["super+alt+o"], "command": "tita", "args": {"device": "iphone", "target": "device"} 
 },
+super+alt+d与dashboard显示/隐藏快捷键冲突问题：打开“系统设置”－搜索“key”－找到条目修改。
 
 ====android模拟器加速===
 brew install ccache
@@ -259,11 +306,7 @@ https://github.com/FokkeZB/nl.fokkezb.pullToRefresh/releases（也可以直接gi
 36.关于imageView
 (1) imageView在iOS和android下则必须同时指定高宽才会放大，否则，最大显示原图。由于tss不支持运算式，同时指定高宽一般需在js中指定。
 (2) iamgeView放在scrollView里，iOS下可以放大撑满，多余部分不显示，android下则不会撑大。
-(3) imageAsResized和imageAsCropped要么是不能放大，要么是它的单位固定为px，不随系统定义而改变。(+dp后还是，故考虑真不能放大。至少imageAsResized是这样，不过，当取极大图时也是这样，太诡异了！！！)
-(4) ios下可以通过imageAsResized后放入scrollView里解决图片大小和比例问题，但android上效率太低。，
-postlayout???
-
-
+(3) imageAsResized效率较低，可以通过将image toblob(可下载文件)后，指定图片的高度为blob的高度＊一定的比例。
 
 36.引用本地图片时，android下，图片名称前要加"/"，iOS下可加可不加。
 
@@ -310,12 +353,12 @@ backgroundSelectedColor: "transparent"
 getView('ID').getView('ID').getView('ID')可以一直getView下去。
 
 48.关于推送：
-证书生成前的钥匙串生成见：http://iphone.tgbus.com/dev/iosdev/201205/20120523110841.shtml
-生成pem: http://2015.iteye.com/blog/1567777
+生成pem: http://dmyz.org/archives/472
 (1) 在iOS开发者中心创建App时，appid必须为精确唯一ID，如com.xjp.timenote
 (2) 编绎时provisioning profile与APNS certification版本必须一致，如同为开发环境，同时，host必须为沙盒：gateway.push.apple.com，生产环境时则作相应更改
 (3) device token并非device UUID
 (4) 模拟器由于没有device token，因此，是无法测试push的。
+(5) errno: 34, code: 'ENOENT', path: 'cert.pem'，路径不对报错，原因是运行的node/ruby的目录不是当前目录，改为在当前目录运行即可。
 
 49.关于device_token
 (1) device_token由苹果apns根据注册时发送的appid与设备UUID组合生成，生成后不会轻易改变，即使软件卸载，重新注册，都不会改变，可能改变的情况：操作系统升级，apns自身算法做调整。此外，在同一台设备上同一个appid的应用，卸载后重装也无需重新注册，即使重新注册也无需用户确认（即不会弹出操作提示，为啥？？？）
@@ -412,6 +455,16 @@ $.avatar.image =
 Ti.Filesystem.getFile(Ti.Filesystem.resourcesDirectory, '/images/default_avatar.jpg').read();
 然后post $.avatar.image即可。
 ios下不存在此问题。
+
+=== 文件系统 ===
+1.Titanium.Filesystem.getFile默认是相对路径，即相对于方法所在的js文件的路径。
+2.applicationCacheDirectory,externalStorageDirectory则为绝对路径，一个是内部存储，另一个是外部，android下推荐使用外部cache，故为：
+Titanium.Filesystem[OS_IOS?'applicationCacheDirectory':'externalStorageDirectory'
+3.applicationDirectory和applicationSupportDirectory均为ios所专有，其中后者可为其他程序所用。
+4.applicationDataDirectory存储用户相关内容，非缓存，tempDirectory则当应用退出即清除。
+5.这里有一个对getFile很好的封装：
+http://developer.appcelerator.com/question/45471/how-to-save-a-remote-imagepicture-to-database-or-filesystem
+
 
 68.要得到物件的非输入（显示定义的）宽度和高度，及x,y点，需监听postlayout事件，e.source.rect.height/width/x/y.
 
