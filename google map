@@ -1,0 +1,8 @@
+====== 相关库 ======
+http://maplacejs.com/
+
+====== tips =======
+1.直接请求该地址在ＩＥ下会出错，原因是不能跨域：
+http://maps.googleapis.com/maps/api/geocode/json?address=" + keyword + "&sensor=false&language=zh_CN
+解决办法，引入google map原生库，调用geocoder.geocode方法：
+<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?key=AIzaSyDW2VvP4GH-9gyHlzSdVYEzUmP1T2k2AtU&sensor=true&language=zh"></script>
