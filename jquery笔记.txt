@@ -15,11 +15,14 @@ $('a:contains('+index.toString()+'):last').map(function(){if ($(this).text() == 
 5.tbody[id^=normalthread] a.xst
 
 ====== DOM对象属性与值 ======
+
 1.value在jqurey下为val()
 document.getElementById("input").value
 $("#input").val()
 
+
 ====== 滚动 ======
+
 1.滚动到底部
 最简单：
 window.scrollTo(0, 9999)
@@ -27,7 +30,9 @@ window.scrollTo(0, 9999)
 $('body,html').animate({ scrollTop: $("#J_sendtext").offset().top-$(window).height()+80 }, 'slow');
 参考：http://stackoverflow.com/questions/4249353/jquery-scroll-to-bottom-of-the-page
 
+
 ====== ajax ======
+
 1.获取远程text，用作dot模板:
   $.ajax({
     type: "get",
@@ -47,15 +52,37 @@ $('body,html').animate({ scrollTop: $("#J_sendtext").offset().top-$(window).heig
   }, 'text');
 见：http://stackoverflow.com/questions/10112509/reading-a-text-file-with-jquery
 
+2.动态加载javascript
+$.getScript('http://app.shou65.com:8000/socket.io/socket.io.js', function(data, textStatus, jqxhr) {}
 
+3.设置请示头：
+$.ajax({
+  beforeSend: setHeader,
+})
+
+4.跨域发送cookie，以下两种方法均可：
+(1)dataType: "jsonp", 
+(2)xhrFields: {
+    withCredentials: true
+},
+参考：http://www.php100.com/html/webkaifa/ajax/2010/0112/3792.html
+
+5.Access-Control-Allow-Origin error解决办法：
+crossDomain: true,
+dataType: 'jsonp',
+见：http://stackoverflow.com/questions/6114436/access-control-allow-origin-error-sending-a-jquery-post-to-google-apis
 
 ====== 跨域 ======
+
 1.不同子域，服务器可控的情况
 (1) iframe
 (2) flash
+
 2.不同域名，服务器不可控的情况
 (1) jquery的$.getJSON，仅可get JSON
 (2) FlyJSONP插件，可get或post JSON
 (3) cross-domain-ajax，可get html，实现上借助了YQL(实际上是由YQL服务器中转)
 参考：http://james.padolsey.com/javascript/cross-domain-requests-with-jquery/
 要求POST的：http://christianheilmann.com/2009/11/16/using-yql-to-read-html-from-a-document-that-requires-post-data/
+
+

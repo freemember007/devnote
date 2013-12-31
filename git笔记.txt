@@ -4,6 +4,8 @@ yum -y install git
 ======创建======
 1.先远程后本地的情况：
 git clone git@github.com:freemember007/xmapp.git
+git push origin master
+参见：http://blog.csdn.net/wh_19910525/article/details/7438183
 
 2.先本地后远程的情况：
 git init

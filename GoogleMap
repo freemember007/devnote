@@ -1,0 +1,37 @@
+====== Google API ======
+
+1.调用方法：
+<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?key=AIzaSyDW2VvP4GH-9gyHlzSdVYEzUmP1T2k2AtU&sensor=true&language=zh"></script>
+
+2.ＡＰＩ速查：
+https://developers.google.com/maps/documentation/javascript/reference
+
+
+====== 相关库 ======
+
+1.最轻量级的maplacejs:
+http://maplacejs.com/
+更多markers选项：
+https://developers.google.com/maps/documentation/javascript/reference#MarkerOptions
+
+2.更完整的库gmaps：
+http://hpneo.github.io/gmaps/
+
+3.jquery ui map
+CODE: http://code.google.com/p/jquery-ui-map/
+DEMO: http://jquery-ui-map.googlecode.com/svn/trunk/demos/jquery-google-maps-mobile.html
+
+
+====== 重要tips =======
+
+1.直接请求该地址在ＩＥ下会出错，原因是不能跨域：
+http://maps.googleapis.com/maps/api/geocode/json?address=" + keyword + "&sensor=false&language=zh_CN
+解决办法，引入google map原生库，调用geocoder.geocode方法.
+
+2.创建map时的ＥＬ貌似不接受一个jquery对象，必须用：
+var map = new google.maps.Map(document.getElementById('J_Map'), mapOptions)
+
+====== 案例 ======
+1.可拖动dragable markers:
+案例：http://gmaps-samples-v3.googlecode.com/svn/trunk/draggable-markers/draggable-markers.html
+

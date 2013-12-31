@@ -1,0 +1,20 @@
+====== call与apply ======
+
+1.是每个Function.prototype都有的方法，用法和区别：
+call(this, arg1, arg2...) //多个参数
+apply(this, [arg1, arg2, arg3...]) //两个参数
+所以，当参数明确时可用call, 当参数不明确时可用apply给合arguments
+
+2.没有this的时候apply可省略，魔法：
+(function () {
+     console.log(Array.prototype.slice.call(arguments, 1)); // [ "bar" ]
+})([ "foo", "bar" ]);
+
+3.可用做类的继承：
+Person.call(this,name,age);
+见：http://www.css88.com/archives/4431
+
+4.参考：
+http://www.w3school.com.cn/js/pro_js_inheritance_implementing.asp //来龙去脉
+http://stackoverflow.com/questions/18970112/why-use-function-callthis
+http://www.cnblogs.com/ArthurPatten/p/3335912.html
